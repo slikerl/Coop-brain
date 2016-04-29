@@ -11,6 +11,8 @@ int waterPumpRelay = D3;
 int waterHeatRelay = D4;
 int lightingRelay = D5;
 
+double tempPublish;
+
 void setup() {
   Serial.begin(9600);
   setTempResolution(adcBit);
@@ -20,11 +22,15 @@ void setup() {
   digitalWrite(waterPumpRelay, FALSE);
   digitalWrite(waterHeatRelay, FALSE);
   digitalWrite(lightingRelay, FALSE);
+
+  // publish temperature to cloud
+  Particle.variable("Temperature", tempPublish);
 }
 
 void loop() {
   // get current temperature
   float temperature = getTempFahrenheit();
+  tempPublish = round((double)temperature*10)/10;
   /*Serial.printf("Temperature: %3.1f F\n\r", temperature);*/
 
   //transform temperature into integer threshold
