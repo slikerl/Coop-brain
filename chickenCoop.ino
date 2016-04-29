@@ -1,11 +1,25 @@
 #include "OneWire.h"
 
-OneWire ds = OneWire(D0);  // 1-wire signal on pin D0
 #define adcBit 12
+#define WATER_PUMP_ON_TEMP 37
+#define WATER_PUMP_OFF_TEMP 37
+#define WATER_HEAT_ON_TEMP 40
+#define WATER_HEAT_OFF_TEMP 40
+
+OneWire ds = OneWire(D0);  // 1-wire signal on pin D0
+int waterPumpRelay = D3;
+int waterHeatRelay = D4;
+int lightingRelay = D5;
 
 void setup() {
   Serial.begin(9600);
   setTempResolution(adcBit);
+  pinMode(waterPumpRelay, OUTPUT);
+  pinMode(waterHeatRelay, OUTPUT);
+  pinMode(lightingRelay, OUTPUT);
+  digitalWrite(waterPumpRelay, FALSE);
+  digitalWrite(waterHeatRelay, FALSE);
+  digitalWrite(lightingRelay, FALSE);
 }
 
 void loop() {
@@ -16,6 +30,26 @@ void loop() {
   //transform temperature into integer threshold
   int tempThreshold = (int)temperature;
   Serial.printf("Temperature: %d F\n\r", tempThreshold);
+
+  // Control circulating water pump
+  if (tempThreshold < WATER_PUMP_ON_TEMP) {
+    // turn on circulationg water pump
+    digitalWrite(waterPumpRelay, TRUE);
+  }
+  if (tempThreshold > WATER_PUMP_OFF_TEMP) {
+    // turn off circulating water pump
+    digitalWrite(waterPumpRelay, FALSE);
+  }
+
+  // Control water heater
+  if (tempThreshold < WATER_HEAT_ON_TEMP) {
+    // turn on water heater
+    digitalWrite(waterHeatRelay, TRUE);
+  }
+  if (tempThreshold > WATER_HEAT_OFF_TEMP) {
+    // turn off water heater
+    digitalWrite(waterHeatRelay, FALSE);
+  }
 
 }
 
