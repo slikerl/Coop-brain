@@ -1,7 +1,7 @@
 #include "OneWire.h"
 
 OneWire ds = OneWire(D0);  // 1-wire signal on pin D0
-int adcBit = 12;
+#define adcBit 12
 
 void setup() {
   Serial.begin(9600);
@@ -17,7 +17,6 @@ void loop() {
   int tempThreshold = (int)temperature;
   Serial.printf("Temperature: %d F\n\r", tempThreshold);
 
-  
 }
 
 void setTempResolution(int bitValue) {
