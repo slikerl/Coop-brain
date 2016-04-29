@@ -24,7 +24,7 @@ void setup() {
 
 void loop() {
   // get current temperature
-  float temperature = getTemp();
+  float temperature = getTempFahrenheit();
   /*Serial.printf("Temperature: %3.1f F\n\r", temperature);*/
 
   //transform temperature into integer threshold
@@ -100,7 +100,7 @@ void setTempResolution(int bitValue) {
   }
 }
 
-float getTemp() {
+float getTempFahrenheit() {
   //returns the temperature from one DS18S20 in DEG Celsius
   byte i;
   byte present = 0;
