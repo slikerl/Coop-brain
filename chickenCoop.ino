@@ -7,27 +7,49 @@
 #define WATER_HEAT_OFF_TEMP 40
 
 OneWire ds = OneWire(D0);  // 1-wire signal on pin D0
+
+// Define relay pin values
 int waterPumpRelay = D3;
 int waterHeatRelay = D4;
 int lightingRelay = D5;
 
+// define door switch pin
+int doorSwitch = D1;
+
 double tempPublish;
+bool doorStatus;
 
 void setup() {
   Serial.begin(9600);
   setTempResolution(adcBit);
+
+  // Set relay pin modes
   pinMode(waterPumpRelay, OUTPUT);
   pinMode(waterHeatRelay, OUTPUT);
   pinMode(lightingRelay, OUTPUT);
+
+  // Initialize relay pin values to off
   digitalWrite(waterPumpRelay, FALSE);
   digitalWrite(waterHeatRelay, FALSE);
   digitalWrite(lightingRelay, FALSE);
+
+  // Set switch pin mode
+  pinMode(doorSwitch, INPUT_PULLUP);
 
   // publish temperature to cloud
   Particle.variable("Temperature", tempPublish);
 }
 
 void loop() {
+  doorStatus = digitalRead(doorSwitch);
+  // Check door status
+  if (doorStatus) {
+    Serial.println("Door is open");
+  }
+  else if (!doorStatus) {
+    Serial.println("Door is closed");
+  }
+
   // get current temperature
   float temperature = getTempFahrenheit();
   tempPublish = round((double)temperature*10)/10;
@@ -35,7 +57,7 @@ void loop() {
 
   //transform temperature into integer threshold
   int tempThreshold = (int)temperature;
-  Serial.printf("Temperature: %d F\n\r", tempThreshold);
+  /*Serial.printf("Temperature: %d F\n\r", tempThreshold);*/
 
   // Control circulating water pump
   if (tempThreshold < WATER_PUMP_ON_TEMP) {
