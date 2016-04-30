@@ -38,6 +38,9 @@ void setup() {
 
   // publish temperature to cloud
   Particle.variable("Temperature", tempPublish);
+
+  // publish door status to cloud
+  Particle.variable("DoorOpen", doorStatus);
 }
 
 void loop() {
