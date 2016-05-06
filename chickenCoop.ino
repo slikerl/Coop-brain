@@ -5,6 +5,7 @@
 #define WATER_PUMP_OFF_TEMP 37
 #define WATER_HEAT_ON_TEMP 40
 #define WATER_HEAT_OFF_TEMP 40
+#define DOOR_STEPS_FROM_OPEN_TO_CLOSE 100
 
 OneWire ds = OneWire(D0);  // 1-wire signal on pin D0
 
@@ -15,6 +16,10 @@ int lightingRelay = D5;
 
 // define door switch pin
 int doorSwitch = D1;
+
+// define door variables
+bool doorDirectionUp = TRUE; // TRUE = up direction, FALSE = down direction
+int doorStepsToClose = DOOR_STEPS_FROM_OPEN_TO_CLOSE;
 
 double tempPublish;
 bool doorStatus;
@@ -40,17 +45,17 @@ void setup() {
   Particle.variable("Temperature", tempPublish);
 
   // publish door status to cloud
-  Particle.variable("DoorOpen", doorStatus);
+  Particle.variable("DoorClosed", doorStatus);
 }
 
 void loop() {
   doorStatus = digitalRead(doorSwitch);
   // Check door status
   if (doorStatus) {
-    Serial.println("Door is open");
+    Serial.println("Door is not open");
   }
   else if (!doorStatus) {
-    Serial.println("Door is closed");
+    Serial.println("Door is 100% open");
   }
 
   // get current temperature
@@ -81,7 +86,6 @@ void loop() {
     // turn off water heater
     digitalWrite(waterHeatRelay, FALSE);
   }
-
 }
 
 void setTempResolution(int bitValue) {
