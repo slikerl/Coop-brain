@@ -15,7 +15,8 @@ int waterHeatRelay = D4;
 int lightingRelay = D5;
 
 // define door switch pin
-int doorSwitch = D1;
+int doorSensor = D1;
+int doorSwitch = D2;
 
 // define door variables
 bool doorDirectionUp = TRUE; // TRUE = up direction, FALSE = down direction
@@ -23,6 +24,12 @@ int doorStepsToClose = DOOR_STEPS_FROM_OPEN_TO_CLOSE;
 
 double tempPublish;
 bool doorStatus;
+bool doorSwitchCurrentValue;
+bool doorSwitchLastValue = FALSE;
+
+// Define door action variable
+bool isLastDoorActionOpen = TRUE;
+int currentDoorAction = 0; // 0 = stopped, -1 = closing, 1 = opening
 
 void setup() {
   Serial.begin(9600);
@@ -38,7 +45,10 @@ void setup() {
   digitalWrite(waterHeatRelay, FALSE);
   digitalWrite(lightingRelay, FALSE);
 
-  // Set switch pin mode
+  // Set door sensor pin mode
+  pinMode(doorSensor, INPUT_PULLUP);
+
+  // Set door switch pin mode
   pinMode(doorSwitch, INPUT_PULLUP);
 
   // publish temperature to cloud
@@ -49,13 +59,44 @@ void setup() {
 }
 
 void loop() {
-  doorStatus = digitalRead(doorSwitch);
+  doorSwitchCurrentValue = digitalRead(doorSwitch);
+  // Determine if doorSwitch as been pressed
+  if (doorSwitchCurrentValue == TRUE & doorSwitchLastValue == FALSE) {
+    // Check to see if door is opening, closing, or stopped
+    if (currentDoorAction == 1) {
+      // Door was opening, button press causes door to stop
+      currentDoorAction = 0;
+      isLastDoorActionOpen = TRUE;
+    }
+    else if (currentDoorAction == -1) {
+      currentDoorAction = 0;
+      isLastDoorActionOpen = FALSE;
+    }
+    else if (currentDoorAction == 0 & isLastDoorActionOpen == TRUE) {
+      currentDoorAction = -1;
+    }
+    else if (currentDoorAction == 0 & isLastDoorActionOpen == FALSE) {
+      currentDoorAction = 1;
+    }
+
+    if (currentDoorAction == -1) {
+      Serial.println("closing");
+    }
+    else if (currentDoorAction == 1) {
+      Serial.println("opening");
+    }
+    else if (currentDoorAction == 0) {
+      Serial.println("stopped");
+    }
+  }
+
+  doorStatus = digitalRead(doorSensor);
   // Check door status
   if (doorStatus) {
-    Serial.println("Door is not open");
+    //Serial.println("Door is not open");
   }
   else if (!doorStatus) {
-    Serial.println("Door is 100% open");
+    //Serial.println("Door is 100% open");
   }
 
   // get current temperature
@@ -86,6 +127,8 @@ void loop() {
     // turn off water heater
     digitalWrite(waterHeatRelay, FALSE);
   }
+
+  doorSwitchLastValue = doorSwitchCurrentValue;
 }
 
 void setTempResolution(int bitValue) {
