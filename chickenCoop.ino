@@ -5,22 +5,25 @@
 #define WATER_PUMP_OFF_TEMP 37
 #define WATER_HEAT_ON_TEMP 40
 #define WATER_HEAT_OFF_TEMP 40
-#define DOOR_STEPS_FROM_OPEN_TO_CLOSE 100
-
-OneWire ds = OneWire(D0);  // 1-wire signal on pin D0
+#define DOOR_STEPS 100
 
 // Define relay pin values
-int waterPumpRelay = D3;
-int waterHeatRelay = D4;
-int lightingRelay = D5;
+#define waterPumpRelay D3
+#define waterHeatRelay D4
+#define lightingRelay D5
 
-// define door switch pin
-int doorSensor = D1;
-int doorSwitch = D2;
+// define door related pins
+#define doorSensor D1
+#define doorSwitch D2
+#define easyDriverDir A0
+#define easyDriverStep A1
 
-// define door variables
-bool doorDirectionUp = TRUE; // TRUE = up direction, FALSE = down direction
-int doorStepsToClose = DOOR_STEPS_FROM_OPEN_TO_CLOSE;
+// define door direction constants
+#define doorDirectionUp TRUE
+#define doorDirectionDown FALSE
+
+// define OneWire dignal on pin D0
+OneWire ds = OneWire(D0);  // 1-wire signal on pin D0
 
 double tempPublish;
 bool doorStatus;
@@ -50,6 +53,19 @@ void setup() {
 
   // Set door switch pin mode
   pinMode(doorSwitch, INPUT_PULLUP);
+
+  // Set door motor DIR pin mode
+  pinMode(easyDriverDir, OUTPUT);
+
+  // Set door STEP pin mode
+  pinMode(easyDriverStep, OUTPUT);
+
+  digitalWrite(easyDriverDir, doorDirectionUp);
+  doorStatus = digitalRead(doorSensor);
+  while (doorStatus) {
+    stepDoorUpOne();
+    doorStatus = digitalRead(doorSensor);
+  }
 
   // publish temperature to cloud
   Particle.variable("Temperature", tempPublish);
@@ -234,4 +250,20 @@ float getTempFahrenheit() {
   // default is 12 bit resolution, 750 ms conversion time
   fahrenheit = ((float)raw * 0.0625) * 1.8 + 32.0;
   return fahrenheit;
+}
+
+void stepDoorUpOne() {
+  digitalWrite(easyDriverDir, doorDirectionUp);
+  digitalWrite(easyDriverStep, HIGH);
+  delay(1);
+  digitalWrite(easyDriverStep, LOW);
+  delay(1);
+}
+
+void stepDoorDownOne() {
+  digitalWrite(easyDriverDir, doorDirectionDown);
+  digitalWrite(easyDriverStep, HIGH);
+  delay(1);
+  digitalWrite(easyDriverStep, LOW);
+  delay(1);
 }
