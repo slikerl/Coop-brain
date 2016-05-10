@@ -1,0 +1,31 @@
+Temperature probe:
+red: 5V (VIN pin on photon)
+black: GND
+white: D0 pin on photon
+
+
+Door switch: (set pin to have pull_up resistor, and wire switch from D1 to GND)
+switch open: door is not open (5V)
+switch closed: door is 100% open (GND)
+
+
+Door button: (set pin to have pull-up resistor. Wire NC1 (yellow) to D2 and C1 (black) to GND)
+red = +12V (or +5 in debug mode)
+green = GND
+
+Stepper motor:
+A coil: black, brown wires (in that order)
+B coil: orange, yellow wires (in that order)
+PFD: NC
+RST: NC
+ENABLE: NC
+MS2: GND \__ (Full step mode)
+MS1: GND /  
+GND: GND
+M+ : +12V (or +5V in debug mode)
+DIR: A0
+STEP: A1
+GND: NC
+SLP: NC
++5V: NC
+GND: NC
